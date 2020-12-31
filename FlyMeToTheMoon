@@ -1,0 +1,797 @@
+#include "p16F628a.inc" ;incluir librerias relacionadas con el dispositivo
+__CONFIG _FOSC_INTOSCCLK & _WDTE_OFF & _PWRTE_OFF & _MCLRE_OFF & _BOREN_OFF & _LVP_OFF & _CPD_OFF & _CP_OFF
+
+RES_VECT CODE 0x0000 ; processor reset vector
+GOTO START ; go to beginning of program
+
+INT_VECT CODE 0x004
+    DECFSZ CNT
+    GOTO $+7
+    CALL cancion
+    INCF nota
+    MOVLW D'4' ; 50mS * value
+    MOVWF CNT
+    ;
+    ;
+    MOVLW D'190' ; preload value
+    MOVWF TMR0
+    bcf INTCON, T0IF ; clr TMR0 interrupt flag
+RETFIE
+
+MAIN_PROG CODE 
+
+CNT equ 0x30
+nota equ 0x31
+ 
+i equ 0x32
+j equ 0x33
+k equ 0x34
+ 
+ii equ 0x35
+jj equ 0x36
+kk equ 0x37
+ 
+fin equ 0x38
+
+ 
+START 
+ 
+    CLRF nota
+    CLRF fin
+ 
+    MOVLW 0x07
+    MOVWF CMCON
+    BSF STATUS, RP0
+    MOVLW d'0'
+    MOVWF TRISB
+    MOVWF TRISA
+    
+    movlw b'10000111'
+    movwf OPTION_REG
+    BCF STATUS, RP0 ; BANK 0
+    
+    ; setup TMR0 INT
+    bsf INTCON, GIE ; enable global interrupt
+    bsf INTCON, T0IE ; enable TMR0 interrupt
+    bcf INTCON, T0IF ; clr TMR0 interrupt flag to turn on,
+    ; must be cleared after interrupt
+    ; 256uS * 195 =~ 50mS
+    ; 255 - 195 = 60
+    MOVLW D'60' ; preload value
+    MOVWF TMR0
+    MOVLW D'10' ; 50mS * 20 = 1 Sec.
+    MOVWF CNT
+    CLRF PORTA
+    CLRF PORTB
+    
+NOTAS
+    BTFSS fin,0
+    BSF PORTB,7
+    call tiempo
+    
+    BCF PORTB,7
+    call tiempo
+    
+    GOTO NOTAS
+    
+tiempo:
+	movfw i
+	movwf ii
+iloop:  movfw j
+	movwf jj
+jloop:  decfsz jj,f
+	goto jloop
+	decfsz ii,f
+	goto iloop
+	movfw k
+	movwf kk
+	decfsz kk
+	goto $-1
+	return
+	
+cancion:
+    CLRF fin
+    MOVFW nota
+    XORLW d'0'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'1'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'2'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'3'
+    BTFSC STATUS,Z
+    call si
+    
+    MOVFW nota
+    XORLW d'4'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'5'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'6'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'7'
+    BTFSC STATUS,Z
+    call fa
+    
+    MOVFW nota
+    XORLW d'8'
+    BTFSC STATUS,Z
+    call fa
+    
+    MOVFW nota
+    XORLW d'9'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'10'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'11'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'12'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'13'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'14'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'15'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'16'
+    BTFSC STATUS,Z
+    call si
+    
+    MOVFW nota
+    XORLW d'17'
+    BTFSC STATUS,Z
+    call si
+    
+    MOVFW nota
+    XORLW d'18'
+    BTFSC STATUS,Z
+    call si
+    
+    MOVFW nota
+    XORLW d'19'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'20'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'21'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'22'
+    BTFSC STATUS,Z
+    call fa
+    
+    MOVFW nota
+    XORLW d'23'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'24'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'25'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'26'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'27'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'28'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'29'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'30'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'31'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'32'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'33'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'34'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'35'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'36'
+    BTFSC STATUS,Z
+    call fa
+    
+    MOVFW nota
+    XORLW d'37'
+    BTFSC STATUS,Z
+    call fa
+    
+    MOVFW nota
+    XORLW d'38'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'39'
+    BTFSC STATUS,Z
+    call re
+    
+    MOVFW nota
+    XORLW d'40'
+    BTFSC STATUS,Z
+    call re
+    
+    MOVFW nota
+    XORLW d'41'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'42'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'43'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'44'
+    BTFSC STATUS,Z
+    call fa
+    
+    MOVFW nota
+    XORLW d'45'
+    BTFSC STATUS,Z
+    call fa
+    
+    MOVFW nota
+    XORLW d'46'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'47'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'48'
+    BTFSC STATUS,Z
+    call sols
+    
+    MOVFW nota
+    XORLW d'49'
+    BTFSC STATUS,Z
+    call sols
+    
+    MOVFW nota
+    XORLW d'50'
+    BTFSC STATUS,Z
+    call sols
+    
+    MOVFW nota
+    XORLW d'51'
+    BTFSC STATUS,Z
+    call fa
+    
+    MOVFW nota
+    XORLW d'52'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'53'
+    BTFSC STATUS,Z
+    call mi
+    
+    MOVFW nota
+    XORLW d'54'
+    BTFSC STATUS,Z
+    call re
+    
+    MOVFW nota
+    XORLW d'55'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'56'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'57'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'58'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'59'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'60'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'61'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'62'
+    BTFSC STATUS,Z
+    call dos3
+    
+    MOVFW nota
+    XORLW d'63'
+    BTFSC STATUS,Z
+    call dos3
+    
+    MOVFW nota
+    XORLW d'64'
+    BTFSC STATUS,Z
+    call re
+    
+    MOVFW nota
+    XORLW d'65'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'66'
+    BTFSC STATUS,Z
+    call la
+    ;--------------------------- 3 1/2 tiempos La
+    MOVFW nota
+    XORLW d'67'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'68'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'69'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'70'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'71'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'72'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'73'
+    BTFSC STATUS,Z
+    call la
+;--------------------------------------------------------------------- 
+    MOVFW nota
+    XORLW d'74'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'75'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'76'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'77'
+    BTFSC STATUS,Z
+    call do
+    
+    MOVFW nota
+    XORLW d'78'
+    BTFSC STATUS,Z
+    call si
+    
+    MOVFW nota
+    XORLW d'79'
+    BTFSC STATUS,Z
+    call si
+    
+    ;-------------------7 tiempos Sol
+    MOVFW nota
+    XORLW d'80'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'81'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'82'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'83'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'84'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'85'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'86'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'87'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'88'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'89'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'90'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'91'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'92'
+    BTFSC STATUS,Z
+    call sol
+    
+    MOVFW nota
+    XORLW d'93'
+    BTFSC STATUS,Z
+    call sol
+    ;-------------------------------------------
+    MOVFW nota
+    XORLW d'94'
+    BTFSC STATUS,Z
+    call sols
+    
+    MOVFW nota
+    XORLW d'95'
+    BTFSC STATUS,Z
+    call sols
+    
+    MOVFW nota
+    XORLW d'96'
+    BTFSC STATUS,Z
+    call la
+    
+    MOVFW nota
+    XORLW d'97'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'98'
+    BTFSC STATUS,Z
+    call do3
+    ;--------------------------4 1/2 Do 3
+    MOVFW nota
+    XORLW d'99'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'100'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'101'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'102'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'103'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'104'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'105'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'106'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'107'
+    BTFSC STATUS,Z
+    call do3
+    ;-------------------------------------------
+    MOVFW nota
+    XORLW d'108'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'109'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'110'
+    BTFSC STATUS,Z
+    call re
+    
+    MOVFW nota
+    XORLW d'111'
+    BTFSC STATUS,Z
+    call re
+    
+    MOVFW nota
+    XORLW d'112'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'113'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'114'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'115'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'116'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'117'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'118'
+    BTFSC STATUS,Z
+    call do3
+    
+    MOVFW nota
+    XORLW d'119'
+    BTFSC STATUS,Z
+    call do3
+    ;-------------
+    MOVFW nota
+    XORLW d'120'
+    BTFSC STATUS,Z
+    call rst
+    ;--------------
+    return
+    
+rst:
+    BSF fin,0
+    CLRF nota
+    return
+    
+do:
+    MOVLW d'31'
+    MOVWF i
+    MOVLW d'19'
+    MOVWF j
+    MOVLW d'6'
+    MOVWF k
+    return
+    
+si:
+    MOVLW d'31'
+    MOVWF i
+    MOVLW d'20'
+    MOVWF j
+    MOVLW d'13'
+    MOVWF k
+    return
+    
+la:
+    MOVLW d'31'
+    MOVWF i
+    MOVLW d'23'
+    MOVWF j
+    MOVLW d'2'
+    MOVWF k
+    return
+    
+sols:
+    MOVLW d'29'
+    MOVWF i
+    MOVLW d'26'
+    MOVWF j
+    MOVLW d'9'
+    MOVWF k
+    return    
+    
+sol:
+    MOVLW d'31'
+    MOVWF i
+    MOVLW d'26'
+    MOVWF j
+    MOVLW d'2'
+    MOVWF k
+    return
+    
+fa:
+    MOVLW d'31'
+    MOVWF i
+    MOVLW d'29'
+    MOVWF j
+    MOVLW d'13'
+    MOVWF k
+    return
+    
+mi:
+    MOVLW d'31'
+    MOVWF i
+    MOVLW d'31'
+    MOVWF j
+    MOVLW d'8'
+    MOVWF k
+    return
+    
+re:
+    MOVLW d'35'
+    MOVWF i
+    MOVLW d'31'
+    MOVWF j
+    MOVLW d'2'
+    MOVWF k
+    return
+    
+dos3:
+    MOVLW d'34'
+    MOVWF i
+    MOVLW d'34'
+    MOVWF j
+    MOVLW d'1'
+    MOVWF k
+    return    
+    
+do3:
+    MOVLW d'34'
+    MOVWF i
+    MOVLW d'36'
+    MOVWF j
+    MOVLW d'4'
+    MOVWF k
+    return
+    
+END
