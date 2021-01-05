@@ -11,8 +11,6 @@ INT_VECT CODE 0x004
     INCF nota
     MOVLW D'4'
     MOVWF CNT
-    ;
-    ;
     MOVLW D'250' ; preload value 190
     MOVWF TMR0
     bcf INTCON, T0IF ; clr TMR0 interrupt flag
@@ -27,9 +25,9 @@ i equ 0x32
 j equ 0x33
 k equ 0x34
  
-ii equ 0x35
-jj equ 0x36
-kk equ 0x37
+m equ 0x35
+n equ 0x36
+l equ 0x37
  
 fin equ 0x38
 
@@ -41,25 +39,22 @@ START
  
     MOVLW 0x07
     MOVWF CMCON
-    BSF STATUS, RP0
+    BSF STATUS,RP0
     MOVLW d'0'
     MOVWF TRISB
     MOVWF TRISA
     
     movlw b'10000111'
     movwf OPTION_REG
-    BCF STATUS, RP0 ; BANK 0
+    BCF STATUS,RP0
     
-    ; setup TMR0 INT
-    bsf INTCON, GIE ; enable global interrupt
-    bsf INTCON, T0IE ; enable TMR0 interrupt
-    bcf INTCON, T0IF ; clr TMR0 interrupt flag to turn on,
-    ; must be cleared after interrupt
-    ; 256uS * 195 =~ 50mS
-    ; 255 - 195 = 60
-    MOVLW D'60' ; preload value
+    bsf INTCON,GIE ; enable global interrupt
+    bsf INTCON,T0IE ; enable TMR0 interrupt
+    bcf INTCON,T0IF ; clr TMR0 interrupt flag to turn on,
+    
+    MOVLW D'60'
     MOVWF TMR0
-    MOVLW D'10' ; 50mS * 20 = 1 Sec.
+    MOVLW D'10' 
     MOVWF CNT
     CLRF PORTA
     CLRF PORTB
@@ -76,16 +71,16 @@ NOTAS
     
 tiempo:
 	movfw i
-	movwf ii
+	movwf m
 iloop:  movfw j
-	movwf jj
-jloop:  decfsz jj,f
+	movwf n
+jloop:  decfsz n,f
 	goto jloop
-	decfsz ii,f
+	decfsz m,f
 	goto iloop
 	movfw k
-	movwf kk
-	decfsz kk
+	movwf l
+	decfsz l
 	goto $-1
 	return
 	
@@ -820,7 +815,8 @@ cancion:
     
 rst:
     BSF fin,0
-    CLRF nota
+    MOVLW d'255'
+    MOVWF nota
     return
     
 si4:
